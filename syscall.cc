@@ -8,13 +8,13 @@
 #define CLOSE_SYSTEM_CALL 3
 /* system call constants */
 
-ssize_t wrapped_open(const void *path, int args){
-	ssize_t returnValue;
+sisize_t wrapped_open(const char *path, int args){
+	sisize_t returnValue;
 
 	asm volatile (
 		"syscall"
 		: "=a" (returnValue)
-		: "0"(OPEN_SYSTEM_CALL), "D"(path), "d"(args)
+		: "0"(OPEN_SYSTEM_CALL), "D"(path), "S"(args)
 		: "cc", "rcx", "r11", "memory"
 	);
 
@@ -24,8 +24,8 @@ ssize_t wrapped_open(const void *path, int args){
 /*
  *	low level c++/assembly code for Intel 64-bit CPU to make a call to the write system call
  */
-ssize_t my_write(int fd, const void *buffer, isize_t size) {
-	ssize_t returnValue;
+sisize_t my_write(int fd, const void *buffer, uisize_t size) {
+	sisize_t returnValue;
 
 	/* inline assembly in GCC syntax:
 

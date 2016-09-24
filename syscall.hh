@@ -1,8 +1,8 @@
 #pragma once
 
-typedef int ssize_t;
-typedef unsigned int isize_t;
+typedef int sisize_t;
+typedef unsigned int uisize_t;
 
-ssize_t my_write(int fd, const void *buffer, isize_t size);
+sisize_t my_write(int fd, const void *buffer, uisize_t size);
 
-ssize_t wrapped_open(const void *path, int args);
+sisize_t wrapped_open(const char *path, int args);
