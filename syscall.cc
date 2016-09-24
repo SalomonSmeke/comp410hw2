@@ -8,11 +8,23 @@
 #define CLOSE_SYSTEM_CALL 3
 /* system call constants */
 
+ssize_t wrapped_open(const void *path, int args){
+	ssize_t returnValue;
+
+	asm volatile (
+		"syscall"
+		: "=a" (returnValue)
+		: "0"(OPEN_SYSTEM_CALL), "D"(path), "d"(args)
+		: "cc", "rcx", "r11", "memory"
+	);
+
+	return returnValue;
+}
 
 /*
  *	low level c++/assembly code for Intel 64-bit CPU to make a call to the write system call
  */
-ssize_t my_write(int fd, const void *buffer, size_t size) {
+ssize_t my_write(int fd, const void *buffer, isize_t size) {
 	ssize_t returnValue;
 
 	/* inline assembly in GCC syntax:
@@ -25,7 +37,7 @@ ssize_t my_write(int fd, const void *buffer, size_t size) {
 
 		"asm volatile" tells GCC that our code goes exactly where we put it
 
-		assembler template: 
+		assembler template:
 			"syscall" - call the 64-bit intell instruction "syscall"
 
 		output operands:
@@ -55,4 +67,3 @@ ssize_t my_write(int fd, const void *buffer, size_t size) {
 
 	return returnValue;
 }
-
