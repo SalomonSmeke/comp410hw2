@@ -14,7 +14,7 @@ sisize_t wrapped_open(const char *path, int args){
 	asm volatile (
 		"syscall"
 		: "=a" (returnValue)
-		: "0"(OPEN_SYSTEM_CALL), "D"(path), "S"(args)
+		: "0"(OPEN_SYSTEM_CALL), "D"(path), "S"(args), "d"(0666)
 		: "cc", "rcx", "r11", "memory"
 	);
 
