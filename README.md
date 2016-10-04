@@ -42,3 +42,5 @@ I dont know why i segfault at 10MB. I certainly have 10MB of ram available to bu
 Why is OSX performing so poorly? My VM managed 1.4 seconds on the smallest buffer... And the VM is hosted on OSX. HMMMMM. FISHY.
 
 Go ahead and run test.sh if youd like to check it out for yourself!
+
+Please note! I started this by working alongside Tyler Bobella. We did NOT copy each others code. We DID share online resources like: `https://filippo.io/linux-syscall-table/`. We mostly talked about what the assignment was about.
