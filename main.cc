@@ -1,11 +1,16 @@
 #include "syscall.hh"
 #include <fcntl.h>
+#include <stdlib.h>
 
 int main(int argc, char** argv){
 
 	unsigned int write_bytes = 100 * 1000 * 1000; //100 * kb * mb
+	unsigned int buffer_size = atoi(argv[1]); //from args
 
-	unsigned int buffer_size = 100; //seg fault if too large
+	if (!buffer_size) {
+		buffer_size = 1;
+	}
+
 	unsigned int descriptor = wrapped_open("out", O_WRONLY | O_CREAT);
 
 	unsigned int iterations = write_bytes / buffer_size;
