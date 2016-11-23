@@ -1,46 +1,76 @@
-#####Salomon Smeke
-##HW2
+Hello!
 
-###Thought process:
+Welcome to my little arch install with my re-compiled kernel!
 
-When I began looking at my perfomance figures. The following was the state of my program:
+Let me go through what I did to get here. Its a doozy.
 
-https://github.com/SalomonSmeke/comp410hw2/commit/f6c44f4406dee999727223989013065e0a62fe82#diff-d759577e53e2ce061239002d8a592cc5
+1- Downloaded an arch image.
+2- Installed arch in a vm
+  a- Created a custom vm to boot the arch image
+  b- set it to efi mode by editing the vmware image and setting `firmware='efi'`
+  c- Booted into the arch install cd
+  d- Set the time to use network time
+  e- Created a partition table with:
+  ```
+  sda1 - Boot, .5G - EFI
+  sda2 - Root, 22G - Filesystem
+  sda3 - Swap, 2G - Swap
 
-For context: There is a fairly complex buffer going on. I wanted it to write `\_o_/` over and over. So my buffer was initialized with a switch statement and all that jazz to get the desired effect.
+  ```
+  f- Formatted the efi parition to f32
+  g- Formatted the root parition to ext4
+  h- Made sda3 swap, set to swapon.
+  i- Selected a closer pacman mirror (illinois vs france)
+  j- Installed base and base-devel to Filesystem. Mounted as:
+  ```
+  /mnt -> sda2
+  /mnt/boot -> sda1
 
-When I saw my performance figures, I was confused:
-`This all seems so linear! Double the buffer, half the time.`
+  ```
+  k- Generated fstab
+  l- Chroot into arch install
+  m- Set locale to en_us and generated locales
+  o- Set hwclock to my timezone
+  p- Installed intel microcode
+  q- installed default arch efi bootloader
+  r- Edited the loader.conf to add an arch entry
+  s- Created a boot entry for sda2 with its uuid to boot into arch and default kernel
+  t- Set root password to root.
+  u- Created 'archlinux' user with group wheel
+  v- Gave it sudo access via visudo
+  w- Enabled multilib
+  x- Installed xorg
+  y- Installed xfce, zsh, atom, etc. XFCE is aliased to 'gui'
+  z- Installed vmware drivers.
+3- Got a matching copy of my kernel from kernel.org
+4- Configured to match the current kernel
+5- Changed the version name to Arch-+
+6- Edited the syscall table to add my own syscall
+7- Added my function to sys.c
+8- Make -j3 *this takes an eternity*
+9- Make -j3 modules_install
+10- Copy kernel to /boot
+11- Copy mknitcpio and replace linux for my way cooler linux-Arch-+
+12- mkinitcpio -P linux-Arch-+
+13- Tried super hard for super long to get booting to darn work. I finally got it.
+  a- change arch entry in bootloader to point to the new kernel.
+  b- definitely dont try to emulate your kernel in qemu. qemu hates you.
 
-In my eyes. This made no sense. Writing to a hard disk typically involves a block, and my SSD is AF 4K page, so I imagined that anything smaller than 4KB as a buffer would be problematic. I figured: Well, the hard drive will have to go back and fill in the previous sector, completely re-writing it.  It therefore stands to reason that there should be a giant jump in performance when we hit 4K and its multiples.
+Now! All that said and done. I have place a file here that should give you some cool info.
 
-Nope. Linear.
+Please note. I have no idea if this works or not. It doenst seem to create a file, but the call definitely happens and definitely doesnt crash the kernel.
 
-Huh.
+Boot with: root, password_in_email
+If you want a GUI: gui
 
-I reasoned, that mayhaps, the benefits of larger buffers were being diminished by the instantiation of my buffer.
+gcc -o syscallTest syscallTest.c
+./syscallTest 1
+dmesg | tail
 
-I changed my code to just dump random uninitialized data.
+Clearly i added my syscall. But something aint right. I didnt have time to figure
+it out however :( this was pretty rough as it is.
 
-Nothing. Still linear.
+All in all, I am happy that I got a syscall in the kernel. And boy did i learn.
+Never use vido.
 
-Alright. I suppose the hard drive format isnt a huge factor. At this point i wondered if maybe the writes dont flush until the file is closed. Mayhaps, that would mean that the entire contents are written at once. So the buffer doesnt play a part here.
-
-Then it hit me.
-
-For i in range -> write is called range times.
-when range/2 time is roughly /2.
-
-Could it really be this simple? The syscall soft interrupt is the deciding factor?
-
-I cannot believe that flew past me. Especially given that we talked about this in class. Though, my idea was cool!
-
-###Afterthoughts:
-
-I dont know why i segfault at 10MB. I certainly have 10MB of ram available to build my buffer. I tried in mint and OSX (final perfomance numbers from OSX because I am home for the Jewish holiday and do not have my mint VM available to me).
-
-Why is OSX performing so poorly? My VM managed 1.4 seconds on the smallest buffer... And the VM is hosted on OSX. HMMMMM. FISHY.
-
-Go ahead and run test.sh if youd like to check it out for yourself!
-
-Please note! I started this by working alongside Tyler Bobella. We did NOT copy each others code. We DID share online resources like: `https://filippo.io/linux-syscall-table/`. We mostly talked about what the assignment was about.
+As far as I can tell. my syscall is having a hard time closing the file.
